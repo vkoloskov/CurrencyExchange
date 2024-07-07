@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-@WebServlet("/currencies")
+@WebServlet("/currencies/*")
 public class CurrenciesServlet extends HttpServlet {
 
     private CurrencyDao currencyDao = new CurrencyDaoImpSQLite();

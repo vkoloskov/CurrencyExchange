@@ -23,6 +23,8 @@ public class ExchangeRateDaoImpSQLite implements ExchangeRateDao{
             " JOIN currency tc ON exchange_rate.target_currency_id = tc.id" +
             " WHERE bc.code = '%s' AND tc.code = '%s'";
 
+    private static final String INSERT_DATA = "insert into exchange_rate (base_currency_id, target_currency_id, rate) values" +
+            " ((select id from currency where code = '%s'),(select id from currency where code = '%s') , '%.3f')";
     public ExchangeRateDaoImpSQLite() {
         SQLiteDataSource dataSource = new SQLiteDataSource();
         dataSource.setUrl(CONNECTION_URL);
@@ -30,8 +32,8 @@ public class ExchangeRateDaoImpSQLite implements ExchangeRateDao{
     }
 
     @Override
-    public void add(ExchangeRate currency) {
-
+    public void add(String baseCurrencyCode, String targetCurrencyCode, Double rate) {
+        dbClient.run(String.format(INSERT_DATA, baseCurrencyCode, targetCurrencyCode, rate));
     }
 
     @Override
