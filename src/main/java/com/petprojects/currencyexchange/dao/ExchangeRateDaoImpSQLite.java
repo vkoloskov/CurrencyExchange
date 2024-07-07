@@ -25,6 +25,12 @@ public class ExchangeRateDaoImpSQLite implements ExchangeRateDao{
 
     private static final String INSERT_DATA = "insert into exchange_rate (base_currency_id, target_currency_id, rate) values" +
             " ((select id from currency where code = '%s'),(select id from currency where code = '%s') , '%.3f')";
+
+    private static final String UPDATE_CUSTOMER_RENT_CAR_ID = "UPDATE exchange_rate" +
+            " SET rate = '%.3f'" +
+            " FROM (select id from currency where code = '%s') as bc, (select id from currency as tc where code = '%s') as tc" +
+            " WHERE exchange_rate.base_currency_id = bc.id AND exchange_rate.target_currency_id = tc.id";
+
     public ExchangeRateDaoImpSQLite() {
         SQLiteDataSource dataSource = new SQLiteDataSource();
         dataSource.setUrl(CONNECTION_URL);
@@ -44,5 +50,10 @@ public class ExchangeRateDaoImpSQLite implements ExchangeRateDao{
     @Override
     public ExchangeRate getExchangeRateByCodePair(String baseCode, String targetCode) {
         return dbClient.selectList(String.format(SELECT_BY_CODE_PAIR, baseCode, targetCode)).get(0);
+    }
+
+    @Override
+    public void update(Double rate, String baseCurrencyCode, String targetCurrencyCode) {
+        dbClient.run(String.format(UPDATE_CUSTOMER_RENT_CAR_ID, rate, baseCurrencyCode, targetCurrencyCode));
     }
 }

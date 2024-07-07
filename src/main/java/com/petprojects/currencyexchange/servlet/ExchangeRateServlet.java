@@ -38,14 +38,17 @@ public class ExchangeRateServlet extends HttpServlet {
     }
 
 
-    protected void doPatch(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         var paramMap = ServletUtil.getParameterMap(request);
         String currencyPair = ServletUtil.getPathParam(request);
-        String baseCode = currencyPair.substring(0,2);
-        String targetCurrencyCode = currencyPair.substring(3,5);
-        //Double rate = Double.valueOf(request.getParameter("rate"));
+        String baseCurrencyCode = currencyPair.substring(0,3);
+        String targetCurrencyCode = currencyPair.substring(3,6);
+        Double rate = Double.valueOf(paramMap.get("rate"));
+        exchangeRateDao.update(rate, baseCurrencyCode, targetCurrencyCode);
         PrintWriter pw = response.getWriter();
+
+        pw.println(gson.toJson(exchangeRateDao.getExchangeRateByCodePair(baseCurrencyCode, targetCurrencyCode)));
 
     }
 

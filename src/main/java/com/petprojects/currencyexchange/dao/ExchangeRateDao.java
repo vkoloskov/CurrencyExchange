@@ -9,4 +9,5 @@ public interface ExchangeRateDao {
     List<ExchangeRate> getExchangeRates();
     public ExchangeRate getExchangeRateByCodePair(String baseCode, String targetCode);
 
+    void update(Double rate, String baseCurrencyCode, String targetCurrencyCode);
 }
