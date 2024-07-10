@@ -19,6 +19,7 @@ public class ExchangeRateServlet extends HttpServlet {
 
     private final ExchangeRateDao exchangeRateDao = new ExchangeRateDaoImpSQLite();
 
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         String currencyPair = ServletUtil.getPathParam(request);
