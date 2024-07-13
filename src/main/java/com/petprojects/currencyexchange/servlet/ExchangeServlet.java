@@ -3,13 +3,19 @@ package com.petprojects.currencyexchange.servlet;
 import com.google.gson.Gson;
 import com.petprojects.currencyexchange.dao.ExchangeRateDao;
 import com.petprojects.currencyexchange.dao.ExchangeRateDaoImpSQLite;
+import com.petprojects.currencyexchange.model.Currency;
+import com.petprojects.currencyexchange.model.ExchangeDataResponse;
+import com.petprojects.currencyexchange.model.ExchangeRate;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 
+@WebServlet("/exchange")
 public class ExchangeServlet extends HttpServlet {
     private final Gson gson = new Gson();
 
@@ -18,19 +24,41 @@ public class ExchangeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-//        String currencyPair = ServletUtil.getPathParam(request);
-//
-//        response.setContentType("application/json");
-//        PrintWriter pw = response.getWriter();
-//
-//        if(currencyPair.isEmpty()) {
-//            pw.println(gson.toJson(exchangeRateDao.getExchangeRates()));
-//            response.setStatus(400);
-//        } else {
-//            String baseCode = currencyPair.substring(0,3);
-//            String targetCode = currencyPair.substring(3,6);
-//            pw.println(gson.toJson((exchangeRateDao.getExchangeRateByCodePair(baseCode, targetCode))));
-//        }
+        String from = request.getParameter("from").toString();
+        String to = request.getParameter("to").toString();
+        Double amount = Double.valueOf(request.getParameter("amount"));
+
+        response.setContentType("application/json");
+        PrintWriter pw = response.getWriter();
+
+        ExchangeRate exchangeRate = exchangeRateDao.getExchangeRateByCodePair(from,to);
+        ExchangeDataResponse exchangeDataResponse;
+
+        if(exchangeRate != null) {
+            Double convertedAmount = amount * exchangeRate.getRate();
+            exchangeDataResponse = new ExchangeDataResponse(exchangeRate.getBaseCurrency(),exchangeRate.getTargetCurrency(), exchangeRate.getRate(), amount, convertedAmount);
+            pw.println(gson.toJson(exchangeDataResponse));
+            return;
+        }
+        //check reverse pair
+        exchangeRate = exchangeRateDao.getExchangeRateByCodePair(to, from);
+        if(exchangeRate != null) {
+            Double rate = 1/exchangeRate.getRate();
+            Double convertedAmount = amount/rate;
+            exchangeDataResponse = new ExchangeDataResponse(exchangeRate.getBaseCurrency(),exchangeRate.getTargetCurrency(), rate, amount, convertedAmount);
+            pw.println(gson.toJson(exchangeDataResponse));
+            return;
+        }
+        ExchangeRate exchangeRateUsdFrom = exchangeRateDao.getExchangeRateByCodePair("USD", from);
+        ExchangeRate exchangeRateUsdTo = exchangeRateDao.getExchangeRateByCodePair("USD", to);
+        if(exchangeRateUsdFrom == null || exchangeRateUsdTo == null) {
+            pw.println(gson.toJson(new HashMap<String, String>().put("message", "Валюта не найдена")));
+        } else {
+            Double rate = exchangeRateUsdFrom.getRate()/exchangeRateUsdTo.getRate();
+            Double convertedAmount = amount/rate;
+            exchangeDataResponse = new ExchangeDataResponse(exchangeRateUsdFrom.getBaseCurrency(),exchangeRateUsdTo.getTargetCurrency(), rate, amount, convertedAmount);
+            pw.println(gson.toJson(exchangeDataResponse));
+        }
 
     }
 }

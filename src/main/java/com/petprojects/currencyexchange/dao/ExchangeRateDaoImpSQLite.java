@@ -49,7 +49,8 @@ public class ExchangeRateDaoImpSQLite implements ExchangeRateDao{
 
     @Override
     public ExchangeRate getExchangeRateByCodePair(String baseCode, String targetCode) {
-        return dbClient.selectList(String.format(SELECT_BY_CODE_PAIR, baseCode, targetCode)).get(0);
+        var exchangeRate = dbClient.selectList(String.format(SELECT_BY_CODE_PAIR, baseCode, targetCode));
+        return exchangeRate.isEmpty() ? null : exchangeRate.get(0);
     }
 
     @Override
