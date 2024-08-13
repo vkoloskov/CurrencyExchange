@@ -1,42 +1,79 @@
 package com.petprojects.currencyexchange.dao;
 
-import com.petprojects.currencyexchange.db.CurrencyDbClient;
 import com.petprojects.currencyexchange.model.Currency;
-import org.sqlite.SQLiteDataSource;
+import com.petprojects.currencyexchange.utils.ConnectionManager;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CurrencyDaoImpSQLite implements CurrencyDao {
-    private final CurrencyDbClient dbClient;
+    private static final CurrencyDaoImpSQLite INSTANCE;
 
-    private static final String CONNECTION_URL ="jdbc:sqlite:" + CurrencyDbClient.class.getResource("/currency_exchange.db");
 
-    private static final String SELECT_ALL = "SELECT * FROM currency";
+    static {
+        INSTANCE = new CurrencyDaoImpSQLite();
+    }
 
-    private static final String SELECT_BY_CODE = "SELECT * FROM currency WHERE code = '%s'";
+    public static CurrencyDaoImpSQLite getInstance() {
+        return INSTANCE;
+    }
 
-    private static final String INSERT_DATA = "INSERT INTO currency (full_name, code, sign) VALUES ('%s','%s','%s')";
-    private static final String UPDATE_CUSTOMER_RENT_CAR_ID = "UPDATE currency " +
-            "SET RENTED_CAR_ID = '%d' " +
-            "WHERE ID = '%d'";
+    private static final String SELECT_FROM_CURRENCY = "SELECT id, code, full_name, sign FROM currency";
 
-    public CurrencyDaoImpSQLite() {
-        SQLiteDataSource dataSource = new SQLiteDataSource();
-        dataSource.setUrl(CONNECTION_URL);
-        this.dbClient = new CurrencyDbClient(dataSource);
+    private static final String SELECT_BY_CODE = """
+            SELECT id, code, full_name, sign FROM currency WHERE code = ?
+            """;
+
+    private static final String INSERT_DATA = """
+            INSERT INTO currency (full_name, code, sign) VALUES (?,?,?)
+    """;
+    private static final String UPDATE_CUSTOMER_RENT_CAR_ID = """
+            UPDATE currency
+            SET RENTED_CAR_ID = ?
+            WHERE ID = ?
+            """;
+
+    private CurrencyDaoImpSQLite() {
     }
     @Override
     public void add(Currency currency) {
-        dbClient.run(String.format(INSERT_DATA, currency.getName(), currency.getCode(), currency.getSign()));
+        try(Connection connection = ConnectionManager.get();
+            PreparedStatement statement = connection.prepareStatement(INSERT_DATA)) {
+            statement.setString(1, currency.getName());
+            statement.setString(2, currency.getCode());
+            statement.setString(3, currency.getSign());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public List<Currency> getAllCurrencies() {
-        return dbClient.selectList(SELECT_ALL);
+    public List<Currency> getCurrencies() {
+        List<Currency> currencies = new ArrayList<>();
+        try(Connection connection = ConnectionManager.get();
+            PreparedStatement statement = connection.prepareStatement(SELECT_FROM_CURRENCY)) {
+            ResultSet resultSet = statement.executeQuery();
+            while(resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String code = resultSet.getString("code");
+                String fullName = resultSet.getString("full_name");
+                String sign = resultSet.getString("sign");
+                Currency currency = new Currency(id, fullName, code, sign);
+                currencies.add(currency);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return currencies;
     }
 
     @Override
     public Currency getCurrencyByCode(String code) {
-        return dbClient.selectList(String.format(SELECT_BY_CODE, code)).get(0);
+        return new Currency(1,"tt","r","f");
     }
 }

@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface CurrencyDao {
     void add(Currency currency);
-    List<Currency> getAllCurrencies();
+    List<Currency> getCurrencies();
     public Currency getCurrencyByCode(String code);
 }

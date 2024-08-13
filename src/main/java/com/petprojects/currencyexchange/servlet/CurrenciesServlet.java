@@ -14,14 +14,14 @@ import java.io.PrintWriter;
 @WebServlet("/currencies/*")
 public class CurrenciesServlet extends HttpServlet {
 
-    private CurrencyDao currencyDao = new CurrencyDaoImpSQLite();
-    private Gson gson = new Gson();
+    private final CurrencyDao currencyDao = CurrencyDaoImpSQLite.getInstance();
+    private final Gson gson = new Gson();
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         response.setContentType("application/json");
         PrintWriter pw = response.getWriter();
 
-        pw.println(gson.toJson(currencyDao.getAllCurrencies()));
+        pw.println(gson.toJson(currencyDao.getCurrencies()));
 
 
     }

@@ -16,8 +16,8 @@ import java.io.PrintWriter;
 @WebServlet("/currency/*")
 public class CurrencyServlet extends HttpServlet {
 
-    private CurrencyDao currencyDao = new CurrencyDaoImpSQLite();
-    private Gson gson = new Gson();
+    private final CurrencyDao currencyDao = CurrencyDaoImpSQLite.getInstance();
+    private final Gson gson = new Gson();
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         String code = ServletUtil.getPathParam(request);
