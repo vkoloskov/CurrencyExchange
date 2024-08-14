@@ -22,7 +22,7 @@ public class CurrenciesServlet extends HttpServlet {
         response.setContentType("application/json");
         PrintWriter pw = response.getWriter();
 
-        pw.println(gson.toJson(currencyDao.getCurrencies()));
+        pw.println(gson.toJson(currencyDao.findAll()));
 
 
     }
@@ -34,7 +34,7 @@ public class CurrenciesServlet extends HttpServlet {
         String sign = request.getParameter("sign");
         var currency = new Currency(name, code, sign);
         currencyDao.add(currency);
-        currency = currencyDao.getCurrencyByCode(code);
+        currency = currencyDao.getCurrencyByCode(code).get();
         PrintWriter pw = response.getWriter();
         pw.println(gson.toJson(currency));
     }

@@ -1,5 +1,6 @@
 package com.petprojects.currencyexchange.dao;
 
+import com.petprojects.currencyexchange.dto.CurrencyFilter;
 import com.petprojects.currencyexchange.model.Currency;
 import com.petprojects.currencyexchange.utils.ConnectionManager;
 
@@ -9,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class CurrencyDaoImpSQLite implements CurrencyDao {
     private static final CurrencyDaoImpSQLite INSTANCE;
@@ -22,7 +25,7 @@ public class CurrencyDaoImpSQLite implements CurrencyDao {
         return INSTANCE;
     }
 
-    private static final String SELECT_FROM_CURRENCY = "SELECT id, code, full_name, sign FROM currency";
+    private static final String SELECT_ALL = "SELECT id, code, full_name, sign FROM currency";
 
     private static final String SELECT_BY_CODE = """
             SELECT id, code, full_name, sign FROM currency WHERE code = ?
@@ -52,11 +55,50 @@ public class CurrencyDaoImpSQLite implements CurrencyDao {
         }
     }
 
+    public List<Currency> findAll(CurrencyFilter currencyFilter) {
+        List<Object> parameters = new ArrayList<>();
+        List<String> whereSql = new ArrayList<>();
+        if(currencyFilter.code() != null) {
+            parameters.add(currencyFilter.code());
+            whereSql.add("code = ?");
+        }
+        if(currencyFilter.fullName() != null) {
+            parameters.add(currencyFilter.fullName());
+            whereSql.add("full_name = ?");
+        }
+        parameters.add(currencyFilter.limit());
+        parameters.add(currencyFilter.offset());
+        String where = whereSql.stream().collect(Collectors.joining(
+                " AND ",
+                parameters.size() > 2 ? " WHERE " : "",
+                " LIMIT ? OFFSET ? "
+        ));
+        String sql = SELECT_ALL + where;
+        try(Connection connection = ConnectionManager.get();
+            PreparedStatement statement = connection.prepareStatement(sql)) {
+            List<Currency> currencies = new ArrayList<>();
+            for(int i = 0; i < parameters.size(); i++) {
+                statement.setObject(i + 1, parameters.get(i));
+            }
+            ResultSet resultSet = statement.executeQuery();
+            while(resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String code = resultSet.getString("code");
+                String fullName = resultSet.getString("full_name");
+                String sign = resultSet.getString("sign");
+                Currency currency = new Currency(id, fullName, code, sign);
+                currencies.add(currency);
+            }
+            return currencies;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
     @Override
-    public List<Currency> getCurrencies() {
+    public List<Currency> findAll() {
         List<Currency> currencies = new ArrayList<>();
         try(Connection connection = ConnectionManager.get();
-            PreparedStatement statement = connection.prepareStatement(SELECT_FROM_CURRENCY)) {
+            PreparedStatement statement = connection.prepareStatement(SELECT_ALL)) {
             ResultSet resultSet = statement.executeQuery();
             while(resultSet.next()) {
                 int id = resultSet.getInt("id");
@@ -73,7 +115,11 @@ public class CurrencyDaoImpSQLite implements CurrencyDao {
     }
 
     @Override
-    public Currency getCurrencyByCode(String code) {
-        return new Currency(1,"tt","r","f");
+    public Optional<Currency> getCurrencyByCode(String code) {
+        List<Currency> currencies = findAll(new CurrencyFilter(code, null, 1, 0));
+        if(currencies.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(currencies.get(0));
     }
 }

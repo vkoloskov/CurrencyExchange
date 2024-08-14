@@ -25,7 +25,7 @@ public class CurrencyServlet extends HttpServlet {
             pw.println("Code is empty");
             response.setStatus(400);
         } else {
-            pw.println(gson.toJson(currencyDao.getCurrencyByCode(code)));
+            pw.println(gson.toJson(currencyDao.getCurrencyByCode(code).get()));
         }
 
 
