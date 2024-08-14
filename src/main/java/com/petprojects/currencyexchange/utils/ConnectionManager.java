@@ -1,7 +1,5 @@
 package com.petprojects.currencyexchange.utils;
 
-import com.petprojects.currencyexchange.db.CurrencyDbClient;
-
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,11 +8,16 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class ConnectionManager {
-    static final String CONNECTION_URL = "jdbc:sqlite:" + CurrencyDbClient.class.getResource("/currency_exchange.db");
+    static final String CONNECTION_URL = "jdbc:sqlite:" + ConnectionManager.class.getResource("/currency_exchange.db");
     private static final int DEFAULT_POOL_SIZE = 10;
     private static BlockingQueue<Connection> pool;
 
     static {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        }catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
         initConnectionPool();
     }
 
