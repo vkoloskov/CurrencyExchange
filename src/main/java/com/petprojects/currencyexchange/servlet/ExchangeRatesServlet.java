@@ -16,7 +16,7 @@ public class ExchangeRatesServlet extends HttpServlet {
 
     private final Gson gson = new Gson();
 
-    private final ExchangeRateDao exchangeRateDao = new ExchangeRateDaoImpSQLite();
+    private final ExchangeRateDao exchangeRateDao = ExchangeRateDaoImpSQLite.getInstance();
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 

@@ -18,7 +18,7 @@ import java.util.HashMap;
 public class ExchangeServlet extends HttpServlet {
     private final Gson gson = new Gson();
 
-    private final ExchangeRateDao exchangeRateDao = new ExchangeRateDaoImpSQLite();
+    private final ExchangeRateDao exchangeRateDao = ExchangeRateDaoImpSQLite.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -30,7 +30,7 @@ public class ExchangeServlet extends HttpServlet {
         response.setContentType("application/json");
         PrintWriter pw = response.getWriter();
 
-        ExchangeRate exchangeRate = exchangeRateDao.getExchangeRateByCodePair(from,to);
+        ExchangeRate exchangeRate = exchangeRateDao.getExchangeRateByCodePair(from,to).get();
         ExchangeDataResponse exchangeDataResponse;
 
         if(exchangeRate != null) {
@@ -40,7 +40,7 @@ public class ExchangeServlet extends HttpServlet {
             return;
         }
         //check reverse pair
-        exchangeRate = exchangeRateDao.getExchangeRateByCodePair(to, from);
+        exchangeRate = exchangeRateDao.getExchangeRateByCodePair(to, from).get();
         if(exchangeRate != null) {
             Double rate = 1/exchangeRate.getRate();
             Double convertedAmount = amount/rate;
@@ -48,8 +48,8 @@ public class ExchangeServlet extends HttpServlet {
             pw.println(gson.toJson(exchangeDataResponse));
             return;
         }
-        ExchangeRate exchangeRateUsdFrom = exchangeRateDao.getExchangeRateByCodePair("USD", from);
-        ExchangeRate exchangeRateUsdTo = exchangeRateDao.getExchangeRateByCodePair("USD", to);
+        ExchangeRate exchangeRateUsdFrom = exchangeRateDao.getExchangeRateByCodePair("USD", from).get();
+        ExchangeRate exchangeRateUsdTo = exchangeRateDao.getExchangeRateByCodePair("USD", to).get();
         if(exchangeRateUsdFrom == null || exchangeRateUsdTo == null) {
             pw.println(gson.toJson(new HashMap<String, String>().put("message", "Валюта не найдена")));
         } else {

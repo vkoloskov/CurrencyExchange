@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface CurrencyDao {
     void add(Currency currency);
     List<Currency> findAll();
-    public Optional<Currency> getCurrencyByCode(String code);
+    Optional<Currency> getCurrencyByCode(String code);
 }

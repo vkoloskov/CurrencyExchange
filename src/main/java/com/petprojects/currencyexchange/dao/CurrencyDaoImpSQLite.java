@@ -4,10 +4,7 @@ import com.petprojects.currencyexchange.dto.CurrencyFilter;
 import com.petprojects.currencyexchange.model.Currency;
 import com.petprojects.currencyexchange.utils.ConnectionManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,20 +22,26 @@ public class CurrencyDaoImpSQLite implements CurrencyDao {
         return INSTANCE;
     }
 
-    private static final String SELECT_ALL = "SELECT id, code, full_name, sign FROM currency";
+    private static final String SELECT_ALL = """
+                    SELECT id, code, full_name, sign 
+                    FROM currency
+            """;
 
-    private static final String SELECT_BY_CODE = """
-            SELECT id, code, full_name, sign FROM currency WHERE code = ?
+    private static final String SELECT_BY_ID = """
+            SELECT id, code, full_name, sign 
+            FROM currency
+            WHERE id = ?
             """;
 
     private static final String INSERT_DATA = """
-            INSERT INTO currency (full_name, code, sign) VALUES (?,?,?)
-    """;
-    private static final String UPDATE_CUSTOMER_RENT_CAR_ID = """
-            UPDATE currency
-            SET RENTED_CAR_ID = ?
-            WHERE ID = ?
+                    INSERT INTO currency (full_name, code, sign)
+                    VALUES (?,?,?)
             """;
+//    private static final String UPDATE_CUSTOMER_RENT_CAR_ID = """
+//            UPDATE currency
+//            SET RENTED_CAR_ID = ?
+//            WHERE ID = ?
+//            """;
 
     private CurrencyDaoImpSQLite() {
     }
@@ -121,5 +124,21 @@ public class CurrencyDaoImpSQLite implements CurrencyDao {
             return Optional.empty();
         }
         return Optional.of(currencies.get(0));
+    }
+    public Optional<Currency> getCurrencyById(int id, Connection connection) {
+        try(PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID)) {
+            preparedStatement.setInt(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()) {
+                Optional<Currency> currency = Optional.of(new Currency(resultSet.getInt("id"),
+                        resultSet.getString("code"),
+                        resultSet.getString("full_name"),
+                        resultSet.getString("sign")));
+                return currency;
+            } else
+                return Optional.empty();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
