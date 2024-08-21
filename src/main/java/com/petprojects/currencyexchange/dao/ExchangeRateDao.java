@@ -1,6 +1,6 @@
 package com.petprojects.currencyexchange.dao;
 
-import com.petprojects.currencyexchange.model.ExchangeRate;
+import com.petprojects.currencyexchange.entity.ExchangeRate;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,6 +1,6 @@
 package com.petprojects.currencyexchange.dao;
-import com.petprojects.currencyexchange.model.Currency;
-import com.petprojects.currencyexchange.model.ExchangeRate;
+import com.petprojects.currencyexchange.entity.Currency;
+import com.petprojects.currencyexchange.entity.ExchangeRate;
 import com.petprojects.currencyexchange.utils.ConnectionManager;
 
 import java.sql.Connection;
@@ -64,7 +64,7 @@ public class ExchangeRateDaoImpSQLite implements ExchangeRateDao{
             preparedStatement.setDouble(3, rate);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -84,9 +84,8 @@ public class ExchangeRateDaoImpSQLite implements ExchangeRateDao{
             }
             return exchangeRates;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return List.of();
     }
 
     @Override
@@ -108,11 +107,12 @@ public class ExchangeRateDaoImpSQLite implements ExchangeRateDao{
                         resultSet.getString("tc_sign"));
                 double rate = resultSet.getDouble("rate");
                 return Optional.of(new ExchangeRate(id, baseCurrency, targetCurrency, rate));
+            } else {
+                return Optional.empty();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return Optional.empty();
     }
 
     @Override
@@ -124,7 +124,7 @@ public class ExchangeRateDaoImpSQLite implements ExchangeRateDao{
             preparedStatement.setString(3, targetCurrencyCode);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 }

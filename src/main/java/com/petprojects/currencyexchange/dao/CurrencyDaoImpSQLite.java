@@ -1,7 +1,7 @@
 package com.petprojects.currencyexchange.dao;
 
 import com.petprojects.currencyexchange.dto.CurrencyFilter;
-import com.petprojects.currencyexchange.model.Currency;
+import com.petprojects.currencyexchange.entity.Currency;
 import com.petprojects.currencyexchange.utils.ConnectionManager;
 
 import java.sql.*;
@@ -46,13 +46,18 @@ public class CurrencyDaoImpSQLite implements CurrencyDao {
     private CurrencyDaoImpSQLite() {
     }
     @Override
-    public void add(Currency currency) {
+    public Currency add(Currency currency) {
         try(Connection connection = ConnectionManager.get();
-            PreparedStatement statement = connection.prepareStatement(INSERT_DATA)) {
-            statement.setString(1, currency.getName());
-            statement.setString(2, currency.getCode());
-            statement.setString(3, currency.getSign());
-            statement.executeUpdate();
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_DATA)) {
+            preparedStatement.setString(1, currency.getCode());
+            preparedStatement.setString(2, currency.getName());
+            preparedStatement.setString(3, currency.getSign());
+            preparedStatement.executeUpdate();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            if(resultSet.next()) {
+                currency.setId(resultSet.getInt(1));
+            }
+                return currency;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -125,6 +130,8 @@ public class CurrencyDaoImpSQLite implements CurrencyDao {
         }
         return Optional.of(currencies.get(0));
     }
+
+    @Override
     public Optional<Currency> getCurrencyById(int id, Connection connection) {
         try(PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID)) {
             preparedStatement.setInt(1, id);

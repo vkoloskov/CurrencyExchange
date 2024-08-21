@@ -1,4 +1,4 @@
-package com.petprojects.currencyexchange.model;
+package com.petprojects.currencyexchange.entity;
 
 public class ExchangeDataResponse {
 

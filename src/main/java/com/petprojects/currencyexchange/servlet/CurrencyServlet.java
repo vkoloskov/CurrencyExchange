@@ -3,6 +3,7 @@ package com.petprojects.currencyexchange.servlet;
 import com.google.gson.Gson;
 import com.petprojects.currencyexchange.dao.CurrencyDao;
 import com.petprojects.currencyexchange.dao.CurrencyDaoImpSQLite;
+import com.petprojects.currencyexchange.service.CurrencyService;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +15,7 @@ import java.io.PrintWriter;
 @WebServlet("/currency/*")
 public class CurrencyServlet extends HttpServlet {
 
-    private final CurrencyDao currencyDao = CurrencyDaoImpSQLite.getInstance();
+    private final CurrencyService currencyService = CurrencyService.getInstance();
     private final Gson gson = new Gson();
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
@@ -25,7 +26,13 @@ public class CurrencyServlet extends HttpServlet {
             pw.println("Code is empty");
             response.setStatus(400);
         } else {
-            pw.println(gson.toJson(currencyDao.getCurrencyByCode(code).get()));
+            currencyService.getCurrency(code).ifPresentOrElse(currencyDto -> {
+                        pw.println(gson.toJson(currencyDto));
+                    },
+                    () -> {
+                        pw.println("Code is not found");
+                        response.setStatus(404);
+                    });
         }
 
 
