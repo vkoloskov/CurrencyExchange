@@ -1,5 +1,6 @@
 package com.petprojects.currencyexchange.dto;
 
+import com.petprojects.currencyexchange.entity.Currency;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -18,5 +19,9 @@ public class CurrencyDto {
                 this.name = name;
                 this.code = code;
                 this.sign = sign;
+        }
+
+        public static CurrencyDto mapFrom(Currency currency) {
+                return new CurrencyDto(currency.getName(), currency.getCode(), currency.getSign());
         }
 }

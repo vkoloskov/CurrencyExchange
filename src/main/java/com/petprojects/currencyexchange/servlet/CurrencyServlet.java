@@ -1,9 +1,8 @@
 package com.petprojects.currencyexchange.servlet;
 
 import com.google.gson.Gson;
-import com.petprojects.currencyexchange.dao.CurrencyDao;
-import com.petprojects.currencyexchange.dao.CurrencyDaoImpSQLite;
 import com.petprojects.currencyexchange.service.CurrencyService;
+import com.petprojects.currencyexchange.utils.ServletUtil;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;

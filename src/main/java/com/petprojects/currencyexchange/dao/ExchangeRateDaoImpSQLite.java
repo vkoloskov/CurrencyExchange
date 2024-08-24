@@ -56,13 +56,20 @@ public class ExchangeRateDaoImpSQLite implements ExchangeRateDao{
     private ExchangeRateDaoImpSQLite() {}
 
     @Override
-    public void add(String baseCurrencyCode, String targetCurrencyCode, Double rate) {
+    public Optional<ExchangeRate> add(String baseCurrencyCode, String targetCurrencyCode, Double rate) {
         try(Connection connection = ConnectionManager.get();
         PreparedStatement preparedStatement = connection.prepareStatement(INSERT_EXCHANGE_RATE);) {
-            preparedStatement.setString(1, baseCurrencyCode);
-            preparedStatement.setString(2, targetCurrencyCode);
-            preparedStatement.setDouble(3, rate);
-            preparedStatement.executeUpdate();
+            Optional<Currency> baseCurrencyOptional = currencyDao.getCurrencyByCode(baseCurrencyCode);
+            Optional<Currency> targetCurrencyOptional = currencyDao.getCurrencyByCode(targetCurrencyCode);
+            if (baseCurrencyOptional.isPresent() && targetCurrencyOptional.isPresent()) {
+                preparedStatement.setString(1, baseCurrencyCode);
+                preparedStatement.setString(2, targetCurrencyCode);
+                preparedStatement.setDouble(3, rate);
+                preparedStatement.executeUpdate();
+                return Optional.of(new ExchangeRate(preparedStatement.getGeneratedKeys().getInt(1), baseCurrencyOptional.get(), targetCurrencyOptional.get(), rate));
+            } else {
+                return Optional.empty();
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -116,13 +123,20 @@ public class ExchangeRateDaoImpSQLite implements ExchangeRateDao{
     }
 
     @Override
-    public void update(Double rate, String baseCurrencyCode, String targetCurrencyCode) {
+    public Optional<ExchangeRate> update(Double rate, String baseCurrencyCode, String targetCurrencyCode) {
         try(Connection connection = ConnectionManager.get();
         PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_EXCHANGE_RATE_BY_CODE);) {
-            preparedStatement.setDouble(1, rate);
-            preparedStatement.setString(2, baseCurrencyCode);
-            preparedStatement.setString(3, targetCurrencyCode);
-            preparedStatement.executeUpdate();
+            Optional<Currency> baseCurrency = currencyDao.getCurrencyByCode(baseCurrencyCode);
+            Optional<Currency> targetCurrency = currencyDao.getCurrencyByCode(targetCurrencyCode);
+            if (baseCurrency.isPresent() && targetCurrency.isPresent()) {
+                preparedStatement.setDouble(1, rate);
+                preparedStatement.setString(2, baseCurrencyCode);
+                preparedStatement.setString(3, targetCurrencyCode);
+                preparedStatement.executeUpdate();
+                return Optional.of(new ExchangeRate(preparedStatement.getGeneratedKeys().getInt(1), baseCurrency.get(), targetCurrency.get(), rate));
+            } else {
+                return Optional.empty();
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

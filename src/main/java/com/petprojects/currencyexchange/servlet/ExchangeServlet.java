@@ -23,8 +23,8 @@ public class ExchangeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        String from = request.getParameter("from").toString();
-        String to = request.getParameter("to").toString();
+        String from = request.getParameter("from");
+        String to = request.getParameter("to");
         Double amount = Double.valueOf(request.getParameter("amount"));
 
         response.setContentType("application/json");

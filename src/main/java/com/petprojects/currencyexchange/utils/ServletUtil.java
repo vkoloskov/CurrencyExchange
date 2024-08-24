@@ -1,4 +1,4 @@
-package com.petprojects.currencyexchange.servlet;
+package com.petprojects.currencyexchange.utils;
 
 import com.google.common.base.Splitter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ServletUtil {
-    protected static String getPathParam(HttpServletRequest request) {
+    public static String getPathParam(HttpServletRequest request) {
         String pathInfo = request.getPathInfo();
         return pathInfo != null ? pathInfo.replaceFirst("/","") : "";
     }

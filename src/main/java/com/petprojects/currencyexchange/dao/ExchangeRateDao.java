@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ExchangeRateDao {
-    void add(String baseCurrencyCode, String targetCurrencyCode, Double rate);
+    Optional<ExchangeRate> add(String baseCurrencyCode, String targetCurrencyCode, Double rate);
     List<ExchangeRate> getExchangeRates();
     Optional<ExchangeRate> getExchangeRateByCodePair(String baseCode, String targetCode);
 
-    void update(Double rate, String baseCurrencyCode, String targetCurrencyCode);
+    Optional<ExchangeRate> update(Double rate, String baseCurrencyCode, String targetCurrencyCode);
 }

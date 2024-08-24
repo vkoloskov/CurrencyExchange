@@ -43,6 +43,6 @@ public class CurrencyService {
 
     public CurrencyDto add(CurrencyDto currencyDto) {
         Currency currency = currencyDao.add(new Currency(currencyDto.getCode(), currencyDto.getName(), currencyDto.getSign()));
-        return new CurrencyDto(currency.getId(), currency.getCode(), currency.getName(), currency.getSign());
+        return CurrencyDto.mapFrom(currency);
     }
 }
