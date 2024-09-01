@@ -1,3 +1,4 @@
+package com.petprojects.currencyexchange.filter;
 
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;

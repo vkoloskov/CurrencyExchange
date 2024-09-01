@@ -137,11 +137,10 @@ public class CurrencyDaoImpSQLite implements CurrencyDao {
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
             if(resultSet.next()) {
-                Optional<Currency> currency = Optional.of(new Currency(resultSet.getInt("id"),
+                return Optional.of(new Currency(resultSet.getInt("id"),
                         resultSet.getString("code"),
                         resultSet.getString("full_name"),
                         resultSet.getString("sign")));
-                return currency;
             } else
                 return Optional.empty();
         } catch (SQLException e) {
